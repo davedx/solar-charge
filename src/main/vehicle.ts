@@ -23,7 +23,7 @@ const MAINS_VOLTAGE = 230;
 export const updateChargeStatus = async (currentPvWatts: number) => {
   const tokens = await readTokens();
   if (!tokens || !tokens.access_token) {
-    log.info("No tokens, first authenticate");
+    log.info("No tokens, will not update charge status");
     return;
   }
 
@@ -31,7 +31,7 @@ export const updateChargeStatus = async (currentPvWatts: number) => {
     tokens.access_token,
     tokens.refresh_token
   );
-  //console.log("vehicles:", vehicles.response);
+
   if (vehicles.response.length < 1) {
     log.info("no vehicles found");
     return;

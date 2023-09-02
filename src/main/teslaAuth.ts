@@ -56,7 +56,10 @@ export const refreshAccessToken = async (refreshToken: string) => {
   return result.data.access_token;
 };
 
-const fetchAndStoreToken = async (code: string, codeVerifier: string) => {
+const fetchAndStoreToken = async (
+  code: string,
+  codeVerifier: string
+): Promise<boolean> => {
   const url = `${AUTH_BASE_URL}/${TOKEN_PATH}`;
   const payload = `grant_type=authorization_code&client_id=${clientId}&code_verifier=${codeVerifier}&code=${code}&redirect_uri=https%3A%2F%2Fauth.tesla.com%2Fvoid%2Fcallback`;
   try {
@@ -73,8 +76,10 @@ const fetchAndStoreToken = async (code: string, codeVerifier: string) => {
       access_token: result.data.access_token,
       refresh_token: result.data.refresh_token,
     });
+    return true;
   } catch (e) {
     log.error(e.message);
+    return false;
   }
 };
 
@@ -92,7 +97,10 @@ const buildAuthUrl = () => {
   };
 };
 
-export const authenticate = (mainWindow: BrowserWindow) => {
+export const authenticate = (
+  mainWindow: BrowserWindow,
+  setResult: (res: boolean) => void
+) => {
   let authWindow = new BrowserWindow({
     width: 600,
     height: 600,
@@ -121,21 +129,18 @@ export const authenticate = (mainWindow: BrowserWindow) => {
     const parsedUrl = new URL(url);
 
     console.log("parsedUrl:", parsedUrl);
+    let tokensAcquired = false;
 
     if (parsedUrl.origin === new URL(redirectUri).origin) {
       // Extract the authorization code from the callback URL
       const code = parsedUrl.searchParams.get("code");
 
       if (code) {
-        fetchAndStoreToken(code, codeVerifier);
-
-        // Close the auth window
-        authWindow.close();
-      } else {
-        // Handle errors, e.g., user denied access, etc.
-        // ...
+        tokensAcquired = await fetchAndStoreToken(code, codeVerifier);
       }
+      authWindow.close();
     }
+    setResult(tokensAcquired);
   });
 
   authWindow.on("closed", () => {

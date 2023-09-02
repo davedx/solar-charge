@@ -3,10 +3,7 @@ import path from "path";
 import fs from "fs";
 
 const TOKENS_PATH = path.join(app.getPath("userData"), "tokens.json");
-const CHARGE_SESSIONS_PATH = path.join(
-  app.getPath("userData"),
-  "charge_sessions.json"
-);
+const SETTINGS_PATH = path.join(app.getPath("userData"), "settings.json");
 
 export const readTokens = async () => {
   try {
@@ -23,9 +20,9 @@ export const writeTokens = async (data: any) => {
   fs.writeFileSync(TOKENS_PATH, JSON.stringify(data));
 };
 
-export const readChargeSessions = async () => {
+export const readSettings = async () => {
   try {
-    const data = fs.readFileSync(CHARGE_SESSIONS_PATH, "utf-8");
+    const data = fs.readFileSync(SETTINGS_PATH, "utf-8");
     return JSON.parse(data);
   } catch (error) {
     console.log("Error retrieving user data", error);
@@ -34,6 +31,6 @@ export const readChargeSessions = async () => {
   }
 };
 
-export const writeChargeSessions = async (data: any) => {
-  fs.writeFileSync(CHARGE_SESSIONS_PATH, JSON.stringify(data));
+export const writeSettings = async (data: any) => {
+  fs.writeFileSync(SETTINGS_PATH, JSON.stringify(data));
 };

@@ -4,28 +4,43 @@ import { authenticate } from "./main/teslaAuth";
 import log from "electron-log";
 import { getSolarOutput } from "./main/inverter";
 import { updateChargeStatus } from "./main/vehicle";
+import { readTokens, writeSettings } from "./main/storage";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
   app.quit();
 }
 
+type SettingsPayload = {
+  inverter: string;
+  vehicle: string;
+  homeMinWatts: string;
+};
+
 const createWindow = () => {
   const mainWindow = new BrowserWindow({
     width: 1000,
     height: 900,
+    icon: "../icons/icon.png",
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
   });
 
-  ipcMain.on("set-title", (event, title) => {
-    log.info("title", title);
-    authenticate(mainWindow);
+  ipcMain.on("save-settings", async (event, payload: SettingsPayload) => {
+    log.info("save-settings", payload);
+    await writeSettings(payload);
 
-    const webContents = event.sender;
-    const win = BrowserWindow.fromWebContents(webContents);
-    win.setTitle(title);
+    if (payload.vehicle === "tesla_m3") {
+      const tokens = await readTokens();
+      if (!tokens || !tokens.access_token) {
+        log.info("vehicle is tesla and no tokens found. authenticating");
+        authenticate(mainWindow, (res: boolean) => {
+          log.info("success:", res);
+          // TODO: if successful, redirect to dashboard
+        });
+      }
+    }
   });
 
   // and load the index.html of the app.
@@ -38,7 +53,7 @@ const createWindow = () => {
   }
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 
   const updatePv = async () => {
     const pv = await getSolarOutput();
