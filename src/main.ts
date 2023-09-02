@@ -1,7 +1,9 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import path from "path";
-import { authenticate } from "./teslaAuth";
+import { authenticate } from "./main/teslaAuth";
 import log from "electron-log";
+import { getSolarOutput } from "./main/inverter";
+import { updateChargeStatus } from "./main/vehicle";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -9,10 +11,9 @@ if (require("electron-squirrel-startup")) {
 }
 
 const createWindow = () => {
-  // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1000,
+    height: 900,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
@@ -38,11 +39,24 @@ const createWindow = () => {
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
+
+  const updatePv = async () => {
+    const pv = await getSolarOutput();
+    log.info("pv:", pv);
+    mainWindow.webContents.send("pv", pv);
+
+    try {
+      const vehicleStatus = await updateChargeStatus(pv.current);
+      log.info("vehicleStatus:", vehicleStatus);
+      mainWindow.webContents.send("vehicle", vehicleStatus);
+    } catch (e) {
+      log.error(e);
+    }
+  };
+  setInterval(updatePv, 60_000);
+  updatePv();
 };
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.on("ready", createWindow);
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -61,6 +75,3 @@ app.on("activate", () => {
     createWindow();
   }
 });
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here.

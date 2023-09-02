@@ -2,11 +2,11 @@ import { BrowserWindow } from "electron";
 import crypto from "crypto";
 import axios from "axios";
 import log from "electron-log";
-import { writeUserData } from "./storage";
+import { writeTokens } from "./storage";
 
-const authBaseUrl = "https://auth.tesla.com";
-const authPath = "oauth2/v3/authorize";
-const tokenPath = "oauth2/v3/token";
+const AUTH_BASE_URL = "https://auth.tesla.com";
+const AUTH_PATH = "oauth2/v3/authorize";
+const TOKEN_PATH = "oauth2/v3/token";
 const clientId = "ownerapi";
 const redirectUri = "https://auth.tesla.com/void/callback";
 const scope = "openid+email+offline_access";
@@ -37,8 +37,27 @@ function computeSHA256(text: string) {
   return hash.digest();
 }
 
+export const refreshAccessToken = async (refreshToken: string) => {
+  const url = `${AUTH_BASE_URL}/${TOKEN_PATH}`;
+  const payload = `grant_type=refresh_token&client_id=${clientId}&refresh_token=${refreshToken}&scope=${scope}`;
+  const result = await axios.post(url, payload, {
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+      "X-Tesla-User-Agent": "TeslaApp/4.10.0",
+      "User-Agent": "teslapy/2.8.0",
+    },
+  });
+  log.info("refresh token result:", result.data);
+  writeTokens({
+    access_token: result.data.access_token,
+    refresh_token: result.data.refresh_token,
+  });
+  return result.data.access_token;
+};
+
 const fetchAndStoreToken = async (code: string, codeVerifier: string) => {
-  const url = `${authBaseUrl}/${tokenPath}`;
+  const url = `${AUTH_BASE_URL}/${TOKEN_PATH}`;
   const payload = `grant_type=authorization_code&client_id=${clientId}&code_verifier=${codeVerifier}&code=${code}&redirect_uri=https%3A%2F%2Fauth.tesla.com%2Fvoid%2Fcallback`;
   try {
     const result = await axios.post(url, payload, {
@@ -50,7 +69,7 @@ const fetchAndStoreToken = async (code: string, codeVerifier: string) => {
       },
     });
     log.info("result:", result.data);
-    writeUserData({
+    writeTokens({
       access_token: result.data.access_token,
       refresh_token: result.data.refresh_token,
     });
@@ -67,7 +86,7 @@ const buildAuthUrl = () => {
   const state = generateRandomString();
   return {
     url:
-      `${authBaseUrl}/${authPath}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}` +
+      `${AUTH_BASE_URL}/${AUTH_PATH}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}` +
       `&code_challenge=${codeChallenge}&code_challenge_method=S256`,
     codeVerifier: codeVerifier,
   };
