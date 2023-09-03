@@ -7,6 +7,8 @@ Your easy-to-use charge EV from solar app.
 In August 2023, my energy supplier decided to add a new surcharge that applied to solar panel households who delivered energy to
 the grid (_terugleveren_ in Dutch).[1] It is a laddered charge that increases the more energy you deliver. I ran the numbers, and for our installation, it would add up to an extra 3750 Euros over the lifetime of the panels. This does not seem like the best way to go about a sustainable energy transition, but on the other hand the imbalance costs to suppliers are real, and eventually net metering (_salderen_) in the Netherlands will be phased out. One solution to this issue is batteries, but they are expensive. So why not try cheaper -- or free -- solutions first? Enter the Solar Charger app.
 
+![Screenshot 2023-09-02 at 16 28 46](https://github.com/davedx/solar-charge/assets/1479448/31db9c8f-55fb-4dde-bd49-5978cbd4ba2c)
+
 ## What?
 
 The idea is simple: if you have an EV, charge it from the extra solar power you're generating. Ensure that you charge your EV in a way that avoids delivering solar energy to the grid, so you avoid the surcharge and possibly also pay for less electricity to charge your vehicle.
