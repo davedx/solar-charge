@@ -1,3 +1,5 @@
+MIT License
+
 Copyright (c) 2012-2023 Dave Clayton
 
 Permission is hereby granted, free of charge, to any person obtaining

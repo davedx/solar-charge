@@ -25,11 +25,11 @@ Yes, this app will stay free forever. It runs on your computer and uses your loc
 
 I have tested this software extensively on my own vehicle, and the source code is simple, open, and free to read. No warranty of any kind is provided. [Read the full license.](LICENSE.md)
 
-## Contributors
+### Contributors
 
 Me and mid
 
-## References
+### References
 
 1. [Original announcement](https://vandebron.nl/blog/vaste-terugleveringskosten) by my energy supplier, Vandebron
 2. Research by Dutch newspaper AD finding [other suppliers have also quietly introduced extra surcharges](https://www.linkedin.com/feed/update/urn:li:activity:7100363234800459777/) for households with solar panels
