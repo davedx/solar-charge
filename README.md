@@ -5,7 +5,7 @@ Your easy-to-use charge EV from solar app.
 ## Why?
 
 In August 2023, my energy supplier decided to add a new surcharge that applied to solar panel households who delivered energy into
-the grid (_terugleveren_ in Dutch). It is a laddered charge that increases the more energy you deliver. I ran the numbers, and for our installation, it would add up to an extra 3750 Euros over the lifetime of the panels. This does not seem like the best way to go about a sustainable energy transition, but on the other hand, the imbalance costs to suppliers are real, and eventually net metering (_salderen_) in the Netherlands will be phased out anyway. One solution to this issue is of course batteries, but they are expensive, so why not try cheaper -- or free -- solutions first? Enter the Solar Charger app.
+the grid (_terugleveren_ in Dutch).[1] It is a laddered charge that increases the more energy you deliver. I ran the numbers, and for our installation, it would add up to an extra 3750 Euros over the lifetime of the panels. This does not seem like the best way to go about a sustainable energy transition, but on the other hand, the imbalance costs to suppliers are real, and eventually net metering (_salderen_) in the Netherlands will be phased out anyway. One solution to this issue is of course batteries, but they are expensive, so why not try cheaper -- or free -- solutions first? Enter the Solar Charger app.
 
 ## What?
 
@@ -31,6 +31,6 @@ Me and ♥mid♥
 
 ## References
 
-- [Original announcement](https://vandebron.nl/blog/vaste-terugleveringskosten) by my energy supplier, Vandebron
-- Research by Dutch newspaper AD finding [other suppliers have also quietly introduced extra surcharges](https://www.linkedin.com/feed/update/urn:li:activity:7100363234800459777/?commentUrn=urn%3Ali%3Acomment%3A(activity%3A7100363234800459777%2C7100377283328106496)&dashCommentUrn=urn%3Ali%3Afsd_comment%3A(7100377283328106496%2Curn%3Ali%3Aactivity%3A7100363234800459777)&dashReplyUrn=urn%3Ali%3Afsd_comment%3A(7100568361738059777%2Curn%3Ali%3Aactivity%3A7100363234800459777)&replyUrn=urn%3Ali%3Acomment%3A(activity%3A7100363234800459777%2C7100568361738059777) for households with solar panels
-- My [LinkedIn post](https://www.linkedin.com/feed/update/urn:li:activity:7101495401525952512/) explaining my motivation for developing Solar Charger
+1. [Original announcement](https://vandebron.nl/blog/vaste-terugleveringskosten) by my energy supplier, Vandebron
+2. Research by Dutch newspaper AD finding [other suppliers have also quietly introduced extra surcharges](https://www.linkedin.com/feed/update/urn:li:activity:7100363234800459777/) for households with solar panels
+3. My [LinkedIn post](https://www.linkedin.com/feed/update/urn:li:activity:7101495401525952512/) explaining my motivation for developing Solar Charger
