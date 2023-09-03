@@ -27,7 +27,7 @@ I have tested this software extensively on my own vehicle, and the source code i
 
 ## Contributors
 
-Me and ♥mid♥
+Me and mid
 
 ## References
 
