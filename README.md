@@ -19,7 +19,7 @@ Using data from your inverter, it will ensure all excess solar power is used to 
 
 As this is the first release, it currently only supports my inverter (**Omnik**) and vehicle (**Tesla model 3**). I plan to add support for more inverters as soon as possible.
 
-## Is it really free? Is it safe to use?
+## Is it free? Is it safe to use?
 
 Yes, this app will stay free forever. It runs on your computer and uses your local network. It does not "phone home" or rely on any third party services except the website for your vehicle manufacturer to control charging.
 
