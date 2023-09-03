@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { Settings } from "./Settings";
 import { Dashboard } from "./Dashboard";
@@ -7,23 +7,45 @@ import { Background } from "./components/Background";
 
 const App = () => {
   const [route, setRoute] = useState("dashboard");
-  let page;
-  switch (route) {
-    case "settings":
-      page = <Settings />;
-      break;
-    case "dashboard":
-      page = <Dashboard />;
-      break;
-    default:
-      page = <div>404</div>;
-      break;
-  }
+  const [inverter, setInverter] = useState("omnik");
+  const [inverterIp, setInverterIp] = useState("");
+  const [vehicle, setVehicle] = useState("tesla_m3");
+  const [homeMinWatts, setHomeMinWatts] = useState("250");
+
+  useEffect(() => {
+    (window as any).electronAPI.handleApp((_event: any, value: any) => {
+      if (value?.settings) {
+        setInverter(value.settings.inverter);
+        setInverterIp(value.settings.inverterIp);
+        setVehicle(value.settings.vehicle);
+        setHomeMinWatts(value.settings.homeMinWatts);
+      }
+      if (value?.setRoute === "dashboard") {
+        setRoute("dashboard");
+      } else if (value?.setRoute === "settings") {
+        setRoute("settings");
+      }
+    });
+    (window as any).electronAPI.loadSettings();
+  }, []);
+
   return (
     <>
       <Background />
       <TopNav route={route} setRoute={setRoute} />
-      {page}
+      {route === "settings" && (
+        <Settings
+          inverter={inverter}
+          setInverter={setInverter}
+          inverterIp={inverterIp}
+          setInverterIp={setInverterIp}
+          vehicle={vehicle}
+          setVehicle={setVehicle}
+          homeMinWatts={homeMinWatts}
+          setHomeMinWatts={setHomeMinWatts}
+        />
+      )}
+      {route === "dashboard" && <Dashboard />}
     </>
   );
 };

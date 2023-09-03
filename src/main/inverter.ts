@@ -1,10 +1,15 @@
 import axios from "axios";
+import { SettingsPayload } from "./types";
 
-export const getSolarOutput = async () => {
-  const result = await axios.get("http://192.168.178.143/js/status.js");
+export const getSolarOutput = async (settings: SettingsPayload) => {
+  if (settings?.inverter !== "omnik") {
+    return { peak: 0, current: 0 };
+  }
+  if (!settings?.inverterIp) {
+    return { peak: 0, current: 0 };
+  }
+  const result = await axios.get(`http://${settings.inverterIp}/js/status.js`);
   const text = result.data;
-
-  //console.log("text from inverter:", text);
 
   const regex = /webData="([^"]+)"/;
   const matches = text.match(regex);

@@ -4,7 +4,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
   saveSettings: (payload: any) => {
     ipcRenderer.send("save-settings", payload);
   },
-
+  loadSettings: () => {
+    ipcRenderer.send("load-settings");
+  },
   handlePv: (callback: any) => ipcRenderer.on("pv", callback),
   handleVehicle: (callback: any) => ipcRenderer.on("vehicle", callback),
+  handleApp: (callback: any) => ipcRenderer.on("app", callback),
 });

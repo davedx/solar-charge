@@ -9,7 +9,7 @@ import {
   wakeVehicle,
 } from "./teslaApi";
 
-const HOME_MIN_WATTS = 0; //250;
+const HOME_MIN_WATTS = 250;
 
 // HARDCODE: Tesla
 const VEHICLE_MIN_AMPS = 5;

@@ -1,10 +1,24 @@
-import { useState } from "react";
+type Props = {
+  inverter: string;
+  setInverter: (v: string) => void;
+  inverterIp: string;
+  setInverterIp: (v: string) => void;
+  vehicle: string;
+  setVehicle: (v: string) => void;
+  homeMinWatts: string;
+  setHomeMinWatts: (v: string) => void;
+};
 
-export const Settings = () => {
-  const [inverter, setInverter] = useState("omnik");
-  const [vehicle, setVehicle] = useState("tesla_m3");
-  const [homeMinWatts, setHomeMinWatts] = useState("250");
-
+export const Settings = ({
+  inverter,
+  setInverter,
+  inverterIp,
+  setInverterIp,
+  vehicle,
+  setVehicle,
+  homeMinWatts,
+  setHomeMinWatts,
+}: Props) => {
   return (
     <div className="isolate  px-6 py-20 lg:px-8">
       <div className="mx-auto max-w-2xl text-center">
@@ -20,22 +34,47 @@ export const Settings = () => {
         onSubmit={(e) => e.preventDefault()}
       >
         <div className="grid grid-cols-1 gap-x-8 gap-y-6">
-          <div>
-            <label
-              htmlFor="inverter"
-              className="block text-sm font-semibold leading-6 text-gray-900"
-            >
-              Solar inverter
-            </label>
-            <div className="mt-2.5">
-              <select
-                id="inverter"
-                onChange={(e) => setInverter(e.target.value)}
-                value={inverter}
-                className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label
+                htmlFor="inverter"
+                className="block text-sm font-semibold leading-6 text-gray-900"
               >
-                <option value="omnik">Omnik</option>
-              </select>
+                Solar inverter
+              </label>
+              <div className="mt-2.5">
+                <select
+                  id="inverter"
+                  onChange={(e) => setInverter(e.target.value)}
+                  value={inverter}
+                  className="block w-full rounded-md border-0 px-3.5 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                >
+                  <option value="omnik">Omnik</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex-1">
+              <label
+                htmlFor="inverter_ip"
+                className="block text-sm font-semibold leading-6 text-gray-900"
+              >
+                <span>IP address on my network </span>
+                <a
+                  className="text-orange-700 ml-4"
+                  target="_blank"
+                  href="https://github.com/davedx/solar-charge/wiki/Finding-your-inverter-IP-address"
+                >
+                  Help!
+                </a>
+              </label>
+              <div className="mt-2.5">
+                <input
+                  onChange={(e) => setInverterIp(e.target.value)}
+                  value={inverterIp}
+                  placeholder="192.168.1.25"
+                  className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                />
+              </div>
             </div>
           </div>
           <div>
@@ -63,6 +102,7 @@ export const Settings = () => {
             >
               Minimum watts available for home
             </label>
+            {/*
             <div className="mt-2.5">
               <input
                 type="number"
@@ -72,6 +112,7 @@ export const Settings = () => {
                 onChange={(e) => setHomeMinWatts(e.target.value)}
               />
             </div>
+            */}
             <p className="mt-2 text-sm text-gray-500">
               Your electric vehicle will only be charged when there is
               sufficient solar output, keeping available a buffer of{" "}
@@ -101,6 +142,7 @@ export const Settings = () => {
             onClick={() => {
               (window as any).electronAPI.saveSettings({
                 inverter,
+                inverterIp,
                 vehicle,
                 homeMinWatts,
               });

@@ -4,9 +4,9 @@ const SolarStat = () => {
       <dt className="text-base font-normal text-gray-900">Solar Output</dt>
       <dd className="mt-1 flex items-baseline justify-between md:block lg:flex">
         <div className="flex items-baseline text-2xl font-semibold text-red-600">
-          <span id="pv_current"></span>
+          <span id="pv_current">0</span>
           <span className="ml-2 text-sm font-medium text-gray-500">
-            / <span id="pv_peak"></span> W
+            / <span id="pv_peak">0</span> W
           </span>
         </div>
       </dd>
@@ -40,8 +40,8 @@ const TodayStat = () => {
     <div className="px-4 py-5 sm:p-6">
       <dt className="text-base font-normal text-gray-900">Charged Today</dt>
       <dd className="mt-1 flex items-baseline justify-between md:block lg:flex">
-        <div className="flex items-baseline text-2xl font-semibold text-red-600">
-          3 KWh
+        <div className="flex items-baseline text-sm font-medium text-gray-500">
+          Coming soon
           <span className="ml-2 text-sm font-medium text-gray-500"></span>
         </div>
       </dd>

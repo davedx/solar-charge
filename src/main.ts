@@ -4,18 +4,13 @@ import { authenticate } from "./main/teslaAuth";
 import log from "electron-log";
 import { getSolarOutput } from "./main/inverter";
 import { updateChargeStatus } from "./main/vehicle";
-import { readTokens, writeSettings } from "./main/storage";
+import { readSettings, readTokens, writeSettings } from "./main/storage";
+import { SettingsPayload } from "./main/types";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
   app.quit();
 }
-
-type SettingsPayload = {
-  inverter: string;
-  vehicle: string;
-  homeMinWatts: string;
-};
 
 const createWindow = () => {
   const mainWindow = new BrowserWindow({
@@ -27,20 +22,31 @@ const createWindow = () => {
     },
   });
 
-  ipcMain.on("save-settings", async (event, payload: SettingsPayload) => {
+  ipcMain.on("save-settings", async (_event, payload: SettingsPayload) => {
     log.info("save-settings", payload);
     await writeSettings(payload);
 
+    let goToDashboard = true;
     if (payload.vehicle === "tesla_m3") {
       const tokens = await readTokens();
       if (!tokens || !tokens.access_token) {
         log.info("vehicle is tesla and no tokens found. authenticating");
+        goToDashboard = false;
         authenticate(mainWindow, (res: boolean) => {
           log.info("success:", res);
-          // TODO: if successful, redirect to dashboard
+          mainWindow.webContents.send("app", { setRoute: "dashboard" });
         });
       }
     }
+    if (goToDashboard) {
+      mainWindow.webContents.send("app", { setRoute: "dashboard" });
+    }
+  });
+
+  ipcMain.on("load-settings", async (_event, payload) => {
+    log.info("load-settings");
+    const settings = await readSettings();
+    mainWindow.webContents.send("app", { settings });
   });
 
   // and load the index.html of the app.
@@ -53,10 +59,15 @@ const createWindow = () => {
   }
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 
-  const updatePv = async () => {
-    const pv = await getSolarOutput();
+  const update = async () => {
+    const settings = await readSettings();
+    if (!settings) {
+      return;
+    }
+
+    const pv = await getSolarOutput(settings);
     log.info("pv:", pv);
     mainWindow.webContents.send("pv", pv);
 
@@ -68,8 +79,8 @@ const createWindow = () => {
       log.error(e);
     }
   };
-  setInterval(updatePv, 60_000);
-  updatePv();
+  setInterval(update, 60_000);
+  update();
 };
 
 app.on("ready", createWindow);
