@@ -7,6 +7,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   loadSettings: () => {
     ipcRenderer.send("load-settings");
   },
+  findInverters: () => {
+    ipcRenderer.send("find-inverters");
+  },
   handlePv: (callback: any) => ipcRenderer.on("pv", callback),
   handleVehicle: (callback: any) => ipcRenderer.on("vehicle", callback),
   handleApp: (callback: any) => ipcRenderer.on("app", callback),

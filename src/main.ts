@@ -6,6 +6,7 @@ import { getSolarOutput } from "./main/inverter";
 import { updateChargeStatus } from "./main/vehicle";
 import { readSettings, readTokens, writeSettings } from "./main/storage";
 import { SettingsPayload } from "./main/types";
+import { scanLocalNetwork } from "./main/netScan";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -49,6 +50,13 @@ const createWindow = () => {
     mainWindow.webContents.send("app", { settings });
   });
 
+  ipcMain.on("find-inverters", async (_event, payload) => {
+    scanLocalNetwork().then((ipHosts) => {
+      //log.info("ipHosts:", ipHosts);
+      mainWindow.webContents.send("app", { ipHosts });
+    });
+  });
+
   // and load the index.html of the app.
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
@@ -58,8 +66,9 @@ const createWindow = () => {
     );
   }
 
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  if (process.env.NODE_ENV === "development") {
+    mainWindow.webContents.openDevTools();
+  }
 
   const update = async () => {
     const settings = await readSettings();

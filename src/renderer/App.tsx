@@ -11,6 +11,7 @@ const App = () => {
   const [inverterIp, setInverterIp] = useState("");
   const [vehicle, setVehicle] = useState("tesla_m3");
   const [homeMinWatts, setHomeMinWatts] = useState("250");
+  const [ipHosts, setIpHosts] = useState([]);
 
   useEffect(() => {
     (window as any).electronAPI.handleApp((_event: any, value: any) => {
@@ -19,6 +20,9 @@ const App = () => {
         setInverterIp(value.settings.inverterIp);
         setVehicle(value.settings.vehicle);
         setHomeMinWatts(value.settings.homeMinWatts);
+      }
+      if (value?.ipHosts) {
+        setIpHosts(value.ipHosts);
       }
       if (value?.setRoute === "dashboard") {
         setRoute("dashboard");
@@ -43,6 +47,7 @@ const App = () => {
           setVehicle={setVehicle}
           homeMinWatts={homeMinWatts}
           setHomeMinWatts={setHomeMinWatts}
+          ipHosts={ipHosts}
         />
       )}
       {route === "dashboard" && <Dashboard />}
