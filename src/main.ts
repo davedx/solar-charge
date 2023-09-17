@@ -1,12 +1,12 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import path from "path";
-import { authenticate } from "./main/teslaAuth";
 import log from "electron-log";
 import { getSolarOutput } from "./main/inverter";
 import { updateChargeStatus } from "./main/vehicle";
 import { readSettings, readTokens, writeSettings } from "./main/storage";
 import { SettingsPayload } from "./main/types";
 import { scanLocalNetwork } from "./main/netScan";
+import { createAuth, createVehicle } from "./main/apis";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -25,19 +25,22 @@ const createWindow = () => {
 
   ipcMain.on("save-settings", async (_event, payload: SettingsPayload) => {
     log.info("save-settings", payload);
-    await writeSettings(payload);
+    writeSettings(payload);
 
     let goToDashboard = true;
-    if (payload.vehicle === "tesla_m3") {
-      const tokens = await readTokens();
-      if (!tokens || !tokens.access_token) {
-        log.info("vehicle is tesla and no tokens found. authenticating");
-        goToDashboard = false;
-        authenticate(mainWindow, (res: boolean) => {
-          log.info("success:", res);
-          mainWindow.webContents.send("app", { setRoute: "dashboard" });
-        });
+    const tokens = await readTokens(payload.vehicle);
+    if (!tokens || !tokens.access_token) {
+      log.info(`no token found for ${payload.vehicle}, authenticating`);
+      goToDashboard = false;
+
+      const authorizer = createAuth(payload.vehicle);
+      if (!authorizer) {
+        throw new Error(`unsupported vehicle: ${payload.vehicle}`);
       }
+      authorizer.authorize(mainWindow, (res: boolean) => {
+        log.info("success:", res);
+        mainWindow.webContents.send("app", { setRoute: "dashboard" });
+      });
     }
     if (goToDashboard) {
       mainWindow.webContents.send("app", { setRoute: "dashboard" });
@@ -46,7 +49,7 @@ const createWindow = () => {
 
   ipcMain.on("load-settings", async (_event, payload) => {
     log.info("load-settings");
-    const settings = await readSettings();
+    const settings = readSettings();
     mainWindow.webContents.send("app", { settings });
   });
 
@@ -71,24 +74,29 @@ const createWindow = () => {
   }
 
   const update = async () => {
-    const settings = await readSettings();
+    const settings = readSettings();
     if (!settings) {
       return;
     }
 
-    const pv = await getSolarOutput(settings);
+    const pv = { peak: 3000, current: 2290 }; //await getSolarOutput(settings);
     log.info("pv:", pv);
     mainWindow.webContents.send("pv", pv);
 
+    log.info("settings:", settings);
     try {
-      const vehicleStatus = await updateChargeStatus(pv.current);
-      log.info("vehicleStatus:", vehicleStatus);
-      mainWindow.webContents.send("vehicle", vehicleStatus);
+      const vehicle = await createVehicle(settings.vehicle);
+      if (vehicle) {
+        log.info("trying to update vehicle status:");
+        const vehicleStatus = await updateChargeStatus(vehicle, pv.current);
+        log.info("vehicleStatus:", vehicleStatus);
+        mainWindow.webContents.send("vehicle", vehicleStatus);
+      }
     } catch (e) {
       log.error(e);
     }
   };
-  setInterval(update, 60_000);
+  setInterval(update, 300_000); // 60_000);
   update();
 };
 

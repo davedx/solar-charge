@@ -1,13 +1,5 @@
 import log from "electron-log";
-import { readTokens } from "./storage";
-import {
-  chargeSetAmps,
-  chargeStart,
-  chargeStop,
-  getVehicleList,
-  getVehicleState,
-  wakeVehicle,
-} from "./teslaApi";
+import { VehicleApi } from "./apis";
 
 const HOME_MIN_WATTS = 250;
 
@@ -20,29 +12,28 @@ const VEHICLE_MAX_BATTERY_SOC = 90;
 // HARDCODE: Netherlands
 const MAINS_VOLTAGE = 230;
 
-export const updateChargeStatus = async (currentPvWatts: number) => {
-  const tokens = await readTokens();
-  if (!tokens || !tokens.access_token) {
-    log.info("No tokens, will not update charge status");
-    return;
-  }
+export const updateChargeStatus = async (
+  vehicle: VehicleApi,
+  currentPvWatts: number
+) => {
+  log.info("updating charge status for " + vehicle.type);
 
-  const vehicles = await getVehicleList(
-    tokens.access_token,
-    tokens.refresh_token
-  );
+  // const tokens = await readTokens(tokenId);
+  // if (!tokens || !tokens.access_token) {
+  //   log.info("No tokens, will not update charge status");
+  //   return;
+  // }
 
-  if (vehicles.response.length < 1) {
+  const vehicles = await vehicle.getVehicleList();
+
+  if (vehicles.length < 1) {
     log.info("no vehicles found");
     return;
   }
 
-  const firstVehicle = vehicles.response[0];
-  const vehicleState = await getVehicleState(
-    tokens.access_token,
-    firstVehicle.id
-  );
-  const chargeState = vehicleState.response.charge_state;
+  const firstVehicle = vehicles[0];
+  const vehicleState = await vehicle.getVehicleState(firstVehicle.id);
+  const chargeState = vehicleState.charge_state;
   //log.info(chargeState);
   if (!chargeState) {
     log.info("could not read vehicle charge state");
@@ -61,35 +52,35 @@ export const updateChargeStatus = async (currentPvWatts: number) => {
   );
 
   if (carAmps >= VEHICLE_MIN_AMPS) {
-    await wakeVehicle(tokens.access_token, firstVehicle.id);
+    await vehicle.wakeVehicle(firstVehicle.id);
 
     if (chargingState !== "Charging" && batterySoc < VEHICLE_MAX_BATTERY_SOC) {
       log.info(`Starting charge at ${carAmps} amps`);
-      await chargeSetAmps(tokens.access_token, firstVehicle.id, carAmps);
-      await chargeStart(tokens.access_token, firstVehicle.id);
+      await vehicle.chargeSetAmps(firstVehicle.id, carAmps);
+      await vehicle.chargeStart(firstVehicle.id);
       chargingState = "Charging";
       chargingAmps = carAmps;
     } else if (chargingState === "Charging" && carAmps > chargingAmps) {
       log.info(`Increasing charge to ${carAmps}`);
-      await chargeSetAmps(tokens.access_token, firstVehicle.id, carAmps);
+      await vehicle.chargeSetAmps(firstVehicle.id, carAmps);
       chargingAmps = carAmps;
     } else if (chargingState === "Charging" && carAmps < chargingAmps) {
       log.info(`Decreasing charge to ${carAmps}`);
-      await chargeSetAmps(tokens.access_token, firstVehicle.id, carAmps);
+      await vehicle.chargeSetAmps(firstVehicle.id, carAmps);
       chargingAmps = carAmps;
     }
   } else {
-    await wakeVehicle(tokens.access_token, firstVehicle.id);
+    await vehicle.wakeVehicle(firstVehicle.id);
 
     if (chargingState === "Charging") {
       log.info(`Available current ${carAmps} amps too low, stopping charging`);
-      await chargeStop(tokens.access_token, firstVehicle.id);
+      await vehicle.chargeStop(firstVehicle.id);
       chargingState = "Stopped";
       chargingAmps = 0;
     }
   }
   return {
-    displayName: firstVehicle.display_name,
+    displayName: firstVehicle.name,
     chargingState,
     chargingAmps,
     batterySoc,
